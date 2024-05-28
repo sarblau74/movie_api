@@ -3,8 +3,6 @@ morgan = require('morgan');
 
 const app = express();
 
-  // test
-
   let topMovies = [
     {
         title: 'Alien',
