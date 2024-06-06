@@ -1,9 +1,9 @@
 const express = require('express');
-morgan = require('morgan');
+const morgan = require('morgan'); 
 
 const app = express();
 
-  let topMovies = [
+let topMovies = [
     {
         title: 'Alien',
         director: 'Ridley Scott'
@@ -34,7 +34,7 @@ const app = express();
     },
     {
         title: 'Inception',
-        director: 'Christoper Nolan'
+        director: 'Christopher Nolan' 
     },
     {
         title: 'Fearless',
@@ -45,6 +45,7 @@ const app = express();
         director: 'Harald Zwart'
     },
 ];
+
 // Express static function
 app.use(express.static('public'));
 
@@ -70,5 +71,5 @@ app.use((err, req, res, next) => {
 
 // listen for requests
 app.listen(8080, () => {
-    console.log('Your app is listening on port 8080.');
+    console.log('Your app is listening on port 3000.');
 });
