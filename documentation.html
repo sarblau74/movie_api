@@ -6,46 +6,195 @@
     <title>Document</title>
 </head>
 <body>
-    <p>
-        # Project Title<br />
-  
-        MYFLIX APPLICATION<br />
-  
-        Building the server-side component of a “movies” web application. The web
-        application will provide users with access to information about different
-        movies, directors, and genres. Users will be able to sign up, update their
-        personal information, and create a list of their favorite movies.<br />
-  
-        ## Documentation<br />
-  
-        [Project Brief
-        A2](https://images.careerfoundry.com/public/courses/fullstack-immersion/Full-Stack%20Immersion%20A2%20Project%20Brief.pdf)<br />
-  
-        In 2.1 excercise: Installed node.js open the terminal and run xcode-select
-        --install to install additional command line tools for Xcode needed for
-        installing nvm (Node Version Manager) and eventually NodeJS. You’ll be
-        asked to enter your system user account password run the following command
-        in terminal to install and update the script from the following link
-        https://github.com/nvm-sh/nvm<br />
-  
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh |
-        bash<br />
-  
-        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh
-        | bash<br />
-  
-        Now its time to create a directory using following code in terminal<br />
-  
-        * Create the project directory called "movie_api" <br />
-        mkdir movie_api <br />
-        * Navigate into the "movie_api" directory<br />
-        cd movie_api <br />
-        * Create a JavaScript file called "test.js" within the "movie_api"
-        directory<br />
-        touch test.js <br />
-  
-        In EX 2.2: Create a documentaion.html,test.js, index.html,server.js,
-        log.txt.
-      </p>
+<table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Path</th>
+        <th>Description</th>
+        <th>Example Response</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET</td>
+        <td>/movies</td>
+        <td>Return json data of list of all movies</td>
+        <td>
+          <code>
+            [
+            {
+              id: 1,
+              Title: "The Shawshank Redemption",
+              Description: "Two imprisoned",
+              Director: {
+                name: "Frank Darabont",
+                birth: "28 January 1959",
+                bio: "Frank Darabont is a Hungarian-American film director, 
+              },
+              Genre: {
+                name: "Drama",
+                description: "Drama is a category of narrative fiction intended ."
+              },
+              ReleaseDate: "14 October 1994",
+              ImageUrl: "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg",
+              Rating: 9.3
+            },
+            ]
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>GET</td>
+        <td>/movies/:title</td>
+        <td>Return json data of a single movie</td>
+        <td>
+          <code>
+            [
+            {
+              id: 1,
+              Title: "The Shawshank Redemption",
+              Description: "Two imprisoned",
+              Director: {
+                name: "Frank Darabont",
+                birth: "28 January 1959",
+                bio: "Frank Darabont is a Hungarian-American film director, 
+              },
+              Genre: {
+                name: "Drama",
+                description: "Drama is a category of narrative fiction intended ."
+              },
+              ReleaseDate: "14 October 1994",
+              ImageUrl: "https://upload.wikimedia.org/wikipedia/en/8/81/ShawshankRedemptionMoviePoster.jpg",
+              Rating: 9.3
+            },
+            ]
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>GET</td>
+        <td>/movies/genre/:genreName</td>
+        <td>Return json data of a specific genre</td>
+        <td>
+          <code>
+              Genre: {
+                name: "Drama",
+                description: "Drama is a category of narrative fiction intended ."
+              },
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>GET</td>
+        <td>/movies//director/:directorName</td>
+        <td>Return json data of a single director</td>
+        <td>
+          <code>
+            Director: {
+              name: "Frank Darabont",
+              birth: "28 January 1959",
+              bio: "Frank Darabont is a Hungarian-American film director, 
+            }
+          </code>
+        </td>
+      </tr> 
+      <tr>
+        <td>GET</td>
+        <td>/users</td>
+        <td>Return json data of users list.</td>
+        <td>
+        <code>
+          [
+          {
+            "username": "Joe K",
+            "email": "joe@example.com",
+            "password": "12345",
+            "favoriteMovies": [],
+            "id": "730e086e-de28-4a81-aaab-f3638a887600"
+        }
+        ]
+        </code>
+      </td>
+      </tr>
+      <tr>
+        <td>POST</td>
+        <td>/users</td>
+        <td>Create a new user</td>
+        <td>
+          <code>
+            <code>
+              {
+                "username": "Joe K",
+                "email": "joe@example.com",
+                "password": "12345",
+                "favoriteMovies": [],
+            }
+            </code>
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>GET</td>
+        <td>/users/:username</td>
+        <td>Return Json object of the new user in the database</td>
+        <td>
+          <code>
+            {
+              "username": "Joe K",
+              "email": "joe@example.com",
+              "password": "12345",
+              "favoriteMovies": [],
+              "id": "730e086e-de28-4a81-aaab-f3638a887600"
+          }
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>PUT</td>
+        <td>/users/:username</td>
+        <td>Update a user</td>
+        <td>
+          <code>
+            {
+              "username": "Joe P"
+            }
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>POST</td>
+        <td>/users/:username/:movieTitle</td>
+        <td>add a movie to a user's list of favorites</td>
+        <td>
+          <code>
+            {
+              "favoriteMovies": ["The Shawshank Redemption"]
+            }
+          </code>
+        </td>
+      </tr>
+      <tr>
+        <td>DELETE</td>
+        <td>/users/:username</td>
+        <td>Delete a user</td>
+        <td>
+          <p>
+            "/users/Joe%20P"
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>DELETE</td>
+        <td>/users/:username/:movieTitle</td>
+        <td>Delete a movie from a user's list of favorites</td>
+        <td>
+          <p>
+            "/users/Joe%20P/The%20Shawshank%20Redemption"
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>
