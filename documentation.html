@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Documentation</title>
 </head>
 <body>
+<<<<<<< HEAD
     <p>
         # Project Title<br />
   
@@ -67,5 +68,64 @@
           <li>PUT /users/:username - Update a user's details</li>
           <li>DELETE /users/:username - Delete a user by username</li>
       </ul>
+=======
+  <h1>Movie API Documentation</h1>
+
+  <h2>Endpoints</h2>
+
+  <h3>GET /</h3>
+  <p>Returns a welcome message.</p>
+
+  <h3>GET /documentation</h3>
+  <p>Returns this documentation page.</p>
+
+  <h3>GET /movies</h3>
+  <p>Returns a list of all movies.</p>
+  <pre><code>
+      [
+          { id: 1, title: "The Godfather", director: "Francis Ford Coppola", genre: "Crime, Drama", releaseDate: "24 March 1972", rating: 9.2 },
+          { id: 2, title: "The Dark Knight", director: "Christopher Nolan", genre: "Action, Crime, Drama", releaseDate: "18 July 2008", rating: 9.0 },
+          { id: 3, title: "Pulp Fiction", director: "Quentin Tarantino", genre: "Crime, Drama", releaseDate: "14 October 1994", rating: 8.9 },
+          { id: 4, title: "Forrest Gump", director: "Robert Zemeckis", genre: "Drama, Romance", releaseDate: "6 July 1994", rating: 8.8 },
+          { id: 5, title: "Inception", director: "Christopher Nolan", genre: "Action, Adventure, Sci-Fi", releaseDate: "16 July 2010", rating: 8.8 },
+          { id: 6, title: "Fight Club", director: "David Fincher", genre: "Drama", releaseDate: "15 October 1999", rating: 8.8 },
+          { id: 7, title: "The Matrix", director: "Lana Wachowski, Lilly Wachowski", genre: "Action, Sci-Fi", releaseDate: "31 March 1999", rating: 8.7 },
+          { id: 8, title: "The Lord of the Rings: The Return of the King", director: "Peter Jackson", genre: "Action, Adventure, Drama", releaseDate: "17 December 2003", rating: 8.9 },
+          { id: 9, title: "The Silence of the Lambs", director: "Jonathan Demme", genre: "Crime, Drama, Thriller", releaseDate: "14 February 1991", rating: 8.6 },
+          { id: 10, title: "Schindler's List", director: "Steven Spielberg", genre: "Biography, Drama, History", releaseDate: "4 February 1994", rating: 9.0 }
+      ]
+  </code></pre>
+
+  <h3>GET /users</h3>
+  <p>Returns a list of all users.</p>
+  <pre><code>
+      [
+          { id: 1, name: 'John Doe', email: 'john.doe@example.com' },
+          { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
+      ]
+  </code></pre>
+
+  <h3>POST /users</h3>
+  <p>Adds a new user to the system.</p>
+  <p>Request Body: JSON object with <code>name</code> and <code>email</code> fields.</p>
+
+  <h3>POST /movies</h3>
+  <p>Adds a new movie to the system.</p>
+  <p>Request Body: JSON object with <code>title</code>, <code>director</code>, <code>genre</code>, <code>releaseDate</code>, and <code>rating</code> fields.</p>
+
+  <h3>DELETE /users/:userId</h3>
+  <p>Deletes a user by ID.</p>
+  <p>Path Parameter: <code>userId</code> - ID of the user to delete.</p>
+
+  <h3>DELETE /movies/:movieId</h3>
+  <p>Deletes a movie by ID.</p>
+  <p>Path Parameter: <code>movieId</code> - ID of the movie to delete.</p>
+
+  <h2>Notes</h2>
+  <ul>
+      <li>Ensure that you include all required fields in your POST requests.</li>
+      <li>For DELETE requests, ensure that you provide the correct ID.</li>
+  </ul>
+>>>>>>> 3e0ac74b6600d5fd6f9884f3232722a73e09e368
 </body>
 </html>
