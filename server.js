@@ -1,27 +1,15 @@
+const mongoose = require('mongoose');
+const Models = require('./models.js');
+
+const Movies = Models.Movie;
+const Users = Models.User;
+
+mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true });
+
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const app = express();
-
-// Sample data
-let topMovies = [
-    { id: 1, title: "The Godfather", director: "Francis Ford Coppola", genre: "Crime, Drama", releaseDate: "24 March 1972", rating: 9.2 },
-    { id: 2, title: "The Dark Knight", director: "Christopher Nolan", genre: "Action, Crime, Drama", releaseDate: "18 July 2008", rating: 9.0 },
-    { id: 3, title: "Pulp Fiction", director: "Quentin Tarantino", genre: "Crime, Drama", releaseDate: "14 October 1994", rating: 8.9 },
-    { id: 4, title: "Forrest Gump", director: "Robert Zemeckis", genre: "Drama, Romance", releaseDate: "6 July 1994", rating: 8.8 },
-    { id: 5, title: "Inception", director: "Christopher Nolan", genre: "Action, Adventure, Sci-Fi", releaseDate: "16 July 2010", rating: 8.8 },
-    { id: 6, title: "Fight Club", director: "David Fincher", genre: "Drama", releaseDate: "15 October 1999", rating: 8.8 },
-    { id: 7, title: "The Matrix", director: "Lana Wachowski, Lilly Wachowski", genre: "Action, Sci-Fi", releaseDate: "31 March 1999", rating: 8.7 },
-    { id: 8, title: "The Lord of the Rings: The Return of the King", director: "Peter Jackson", genre: "Action, Adventure, Drama", releaseDate: "17 December 2003", rating: 8.9 },
-    { id: 9, title: "The Silence of the Lambs", director: "Jonathan Demme", genre: "Crime, Drama, Thriller", releaseDate: "14 February 1991", rating: 8.6 },
-    { id: 10, title: "Schindler's List", director: "Steven Spielberg", genre: "Biography, Drama, History", releaseDate: "4 February 1994", rating: 9.0 }
-];
-
-// Dummy user data
-let users = [
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com' },
-    { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
-];
 
 // Middleware
 app.use(morgan('common'));
@@ -39,69 +27,70 @@ app.get('/documentation', (req, res) => {
 
 // Get all movies
 app.get('/movies', (req, res) => {
-    res.json(topMovies);
+    Movies.find()
+        .then(movies => res.json(movies))
+        .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Get all users
-app.get('/users', (req, res) => {
-    res.json(users);
+// Get data about a single movie by title
+app.get('/movies/:title', (req, res) => {
+    Movies.findOne({ title: req.params.title })
+        .then(movie => res.json(movie))
+        .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Add a new user
+// Get data about a genre by name
+app.get('/genres/:name', (req, res) => {
+    Movies.findOne({ 'genre.name': req.params.name })
+        .then(movie => res.json(movie.genre))
+        .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Get data about a director by name
+app.get('/directors/:name', (req, res) => {
+    Movies.findOne({ 'director.name': req.params.name })
+        .then(movie => res.json(movie.director))
+        .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Allow new users to register
 app.post('/users', (req, res) => {
-    console.log('POST /users request received with body:', req.body);
-    const { name, email } = req.body;
-    if (!name || !email) {
-        return res.status(400).send('Name and email are required.');
-    }
-    const newUser = {
-        id: users.length + 1,
-        name,
-        email
-    };
-    users.push(newUser);
-    res.status(201).json(newUser);
+    Users.create({
+        username: req.body.username,
+        password: req.body.password,
+        email: req.body.email,
+        birthday: req.body.birthday
+    })
+    .then(user => res.json(user))
+    .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Add a new movie
-app.post('/movies', (req, res) => {
-    console.log('POST /movies request received with body:', req.body);
-    const { title, director, genre, releaseDate, rating } = req.body;
-    if (!title || !director || !genre || !releaseDate || !rating) {
-        return res.status(400).send('All fields are required.');
-    }
-    const newMovie = {
-        id: topMovies.length + 1,
-        title,
-        director,
-        genre,
-        releaseDate,
-        rating
-    };
-    topMovies.push(newMovie);
-    res.status(201).json(newMovie);
+// Allow users to update their user info
+app.put('/users/:username', (req, res) => {
+    Users.findOneAndUpdate({ username: req.params.username }, { $set: req.body }, { new: true })
+        .then(user => res.json(user))
+        .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Delete a user by ID
-app.delete('/users/:userId', (req, res) => {
-    const userId = parseInt(req.params.userId);
-    const index = users.findIndex(user => user.id === userId);
-    if (index === -1) {
-        return res.status(404).send('User not found.');
-    }
-    users.splice(index, 1);
-    res.status(200).send('User deleted successfully.');
+// Allow users to add a movie to their list of favorites
+app.post('/users/:username/movies/:movieID', (req, res) => {
+    Users.findOneAndUpdate({ username: req.params.username }, { $push: { favoriteMovies: req.params.movieID } }, { new: true })
+        .then(user => res.json(user))
+        .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Delete a movie by ID
-app.delete('/movies/:movieId', (req, res) => {
-    const movieId = parseInt(req.params.movieId);
-    const index = topMovies.findIndex(movie => movie.id === movieId);
-    if (index === -1) {
-        return res.status(404).send('Movie not found.');
-    }
-    topMovies.splice(index, 1);
-    res.status(200).send('Movie deleted successfully.');
+// Allow users to remove a movie from their list of favorites
+app.delete('/users/:username/movies/:movieID', (req, res) => {
+    Users.findOneAndUpdate({ username: req.params.username }, { $pull: { favoriteMovies: req.params.movieID } }, { new: true })
+        .then(user => res.json(user))
+        .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Allow existing users to deregister
+app.delete('/users/:username', (req, res) => {
+    Users.findOneAndRemove({ username: req.params.username })
+        .then(user => res.send('User ' + req.params.username + ' was deleted.'))
+        .catch(err => res.status(500).send('Error: ' + err));
 });
 
 // Error handler
