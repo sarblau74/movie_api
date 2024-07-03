@@ -6,126 +6,169 @@
     <title>Documentation</title>
 </head>
 <body>
-<<<<<<< HEAD
-    <p>
-        # Project Title<br />
-  
-        MYFLIX APPLICATION<br />
-  
-        Building the server-side component of a “movies” web application. The web
-        application will provide users with access to information about different
-        movies, directors, and genres. Users will be able to sign up, update their
-        personal information, and create a list of their favorite movies.<br />
-  
-        ## Documentation<br />
-  
-        [Project Brief
-        A2](https://images.careerfoundry.com/public/courses/fullstack-immersion/Full-Stack%20Immersion%20A2%20Project%20Brief.pdf)<br />
-  
-        In 2.1 excercise: Installed node.js open the terminal and run xcode-select
-        --install to install additional command line tools for Xcode needed for
-        installing nvm (Node Version Manager) and eventually NodeJS. You’ll be
-        asked to enter your system user account password run the following command
-        in terminal to install and update the script from the following link
-        https://github.com/nvm-sh/nvm<br />
-  
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh |
-        bash<br />
-  
-        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh
-        | bash<br />
-  
-        Now its time to create a directory using following code in terminal<br />
-  
-        * Create the project directory called "movie_api" <br />
-        mkdir movie_api <br />
-        * Navigate into the "movie_api" directory<br />
-        cd movie_api <br />
-        * Create a JavaScript file called "test.js" within the "movie_api"
-        directory<br />
-        touch test.js <br />
-  
-        In EX 2.2: Create a documentaion.html,test.js, index.html,server.js,
-        log.txt.
-      </p>
-      <h1>API Documentation</h1>
-      <h2>Endpoints</h2>
-      <h3>Movies</h3>
-      <ul>
-          <li>GET /movies - Retrieve all movies</li>
-          <li>GET /movies/:title - Retrieve a movie by title</li>
-          <li>GET /movies/genre/:genre - Retrieve movies by genre</li>
-          <li>GET /movies/director/:director - Retrieve movies by director</li>
-          <li>POST /movies - Add a new movie</li>
-          <li>PUT /movies/:title - Update a movie's details</li>
-          <li>DELETE /movies/:title - Delete a movie by title</li>
-      </ul>
-      <h3>Users</h3>
-      <ul>
-          <li>GET /users - Retrieve all users</li>
-          <li>GET /users/:username - Retrieve a user by username</li>
-          <li>POST /users - Add a new user</li>
-          <li>PUT /users/:username - Update a user's details</li>
-          <li>DELETE /users/:username - Delete a user by username</li>
-      </ul>
-=======
-  <h1>Movie API Documentation</h1>
+    <h1>Movie API Documentation</h1>
 
-  <h2>Endpoints</h2>
+    <h2>Project Title</h2>
+    <p><strong>MYFLIX APPLICATION</strong></p>
+    <p>Building the server-side component of a “movies” web application. The web application provides users with access to information about different movies, directors, and genres. Users can sign up, update their personal information, and create a list of their favorite movies.</p>
 
-  <h3>GET /</h3>
-  <p>Returns a welcome message.</p>
+    <h2>Documentation</h2>
+    <p><a href="https://images.careerfoundry.com/public/courses/fullstack-immersion/Full-Stack%20Immersion%20A2%20Project%20Brief.pdf">Project Brief A2</a></p>
+    <p>In 2.1 exercise: Installed Node.js, open the terminal and run <code>xcode-select --install</code> to install additional command line tools for Xcode needed for installing nvm (Node Version Manager) and eventually NodeJS. You’ll be asked to enter your system user account password. Run the following command in terminal to install and update the script from the following link:</p>
+    <pre><code>
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    </code></pre>
+    <p>Now it's time to create a directory using the following code in terminal:</p>
+    <ul>
+        <li>Create the project directory called "movie_api": <code>mkdir movie_api</code></li>
+        <li>Navigate into the "movie_api" directory: <code>cd movie_api</code></li>
+        <li>Create a JavaScript file called "test.js" within the "movie_api" directory: <code>touch test.js</code></li>
+    </ul>
+    <p>In EX 2.2: Create documentation.html, test.js, index.html, server.js, log.txt.</p>
 
-  <h3>GET /documentation</h3>
-  <p>Returns this documentation page.</p>
+    <h2>API Endpoints</h2>
 
-  <h3>GET /movies</h3>
-  <p>Returns a list of all movies.</p>
-  <pre><code>
-      [
-          { id: 1, title: "The Godfather", director: "Francis Ford Coppola", genre: "Crime, Drama", releaseDate: "24 March 1972", rating: 9.2 },
-          { id: 2, title: "The Dark Knight", director: "Christopher Nolan", genre: "Action, Crime, Drama", releaseDate: "18 July 2008", rating: 9.0 },
-          { id: 3, title: "Pulp Fiction", director: "Quentin Tarantino", genre: "Crime, Drama", releaseDate: "14 October 1994", rating: 8.9 },
-          { id: 4, title: "Forrest Gump", director: "Robert Zemeckis", genre: "Drama, Romance", releaseDate: "6 July 1994", rating: 8.8 },
-          { id: 5, title: "Inception", director: "Christopher Nolan", genre: "Action, Adventure, Sci-Fi", releaseDate: "16 July 2010", rating: 8.8 },
-          { id: 6, title: "Fight Club", director: "David Fincher", genre: "Drama", releaseDate: "15 October 1999", rating: 8.8 },
-          { id: 7, title: "The Matrix", director: "Lana Wachowski, Lilly Wachowski", genre: "Action, Sci-Fi", releaseDate: "31 March 1999", rating: 8.7 },
-          { id: 8, title: "The Lord of the Rings: The Return of the King", director: "Peter Jackson", genre: "Action, Adventure, Drama", releaseDate: "17 December 2003", rating: 8.9 },
-          { id: 9, title: "The Silence of the Lambs", director: "Jonathan Demme", genre: "Crime, Drama, Thriller", releaseDate: "14 February 1991", rating: 8.6 },
-          { id: 10, title: "Schindler's List", director: "Steven Spielberg", genre: "Biography, Drama, History", releaseDate: "4 February 1994", rating: 9.0 }
-      ]
-  </code></pre>
+    <h3>1. Get All Movies</h3>
+    <p><strong>Endpoint:</strong> <code>/movies</code></p>
+    <p><strong>Method:</strong> GET</p>
+    <p><strong>Description:</strong> Returns a list of all movies.</p>
+    <pre><code>
+Example Request:
+GET /movies
 
-  <h3>GET /users</h3>
-  <p>Returns a list of all users.</p>
-  <pre><code>
-      [
-          { id: 1, name: 'John Doe', email: 'john.doe@example.com' },
-          { id: 2, name: 'Jane Doe', email: 'jane.doe@example.com' }
-      ]
-  </code></pre>
+Example Response:
+[
+    {
+        "_id": "60c72b1f4f1a4a3b9c8b4567",
+        "title": "The Godfather",
+        "genre": { "name": "Crime", "description": "Crime movies" },
+        "director": { "name": "Francis Ford Coppola", "bio": "An American director", "birth": "1939" },
+        "rating": 9.2
+    },
+    ...
+]
+    </code></pre>
 
-  <h3>POST /users</h3>
-  <p>Adds a new user to the system.</p>
-  <p>Request Body: JSON object with <code>name</code> and <code>email</code> fields.</p>
+    <h3>2. Get a Movie by Title</h3>
+    <p><strong>Endpoint:</strong> <code>/movies/:title</code></p>
+    <p><strong>Method:</strong> GET</p>
+    <p><strong>Description:</strong> Returns data about a single movie by title.</p>
+    <pre><code>
+Example Request:
+GET /movies/The%20Godfather
 
-  <h3>POST /movies</h3>
-  <p>Adds a new movie to the system.</p>
-  <p>Request Body: JSON object with <code>title</code>, <code>director</code>, <code>genre</code>, <code>releaseDate</code>, and <code>rating</code> fields.</p>
+Example Response:
+{
+    "_id": "60c72b1f4f1a4a3b9c8b4567",
+    "title": "The Godfather",
+    "genre": { "name": "Crime", "description": "Crime movies" },
+    "director": { "name": "Francis Ford Coppola", "bio": "An American director", "birth": "1939" },
+    "rating": 9.2
+}
+    </code></pre>
 
-  <h3>DELETE /users/:userId</h3>
-  <p>Deletes a user by ID.</p>
-  <p>Path Parameter: <code>userId</code> - ID of the user to delete.</p>
+    <h3>3. Get Data About a Genre by Name</h3>
+    <p><strong>Endpoint:</strong> <code>/genres/:name</code></p>
+    <p><strong>Method:</strong> GET</p>
+    <p><strong>Description:</strong> Returns data about a genre by name.</p>
+    <pre><code>
+Example Request:
+GET /genres/Crime
 
-  <h3>DELETE /movies/:movieId</h3>
-  <p>Deletes a movie by ID.</p>
-  <p>Path Parameter: <code>movieId</code> - ID of the movie to delete.</p>
+Example Response:
+{
+    "name": "Crime",
+    "description": "Crime movies"
+}
+    </code></pre>
 
-  <h2>Notes</h2>
-  <ul>
-      <li>Ensure that you include all required fields in your POST requests.</li>
-      <li>For DELETE requests, ensure that you provide the correct ID.</li>
-  </ul>
->>>>>>> 3e0ac74b6600d5fd6f9884f3232722a73e09e368
-</body>
-</html>
+    <h3>4. Get Data About a Director by Name</h3>
+    <p><strong>Endpoint:</strong> <code>/directors/:name</code></p>
+    <p><strong>Method:</strong> GET</p>
+    <p><strong>Description:</strong> Returns data about a director by name.</p>
+    <pre><code>
+Example Request:
+GET /directors/Francis%20Ford%20Coppola
+
+Example Response:
+{
+    "name": "Francis Ford Coppola",
+    "bio": "An American director",
+    "birth": "1939"
+}
+    </code></pre>
+
+    <h3>5. Register a New User</h3>
+    <p><strong>Endpoint:</strong> <code>/users</code></p>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Description:</strong> Allows a new user to register.</p>
+    <pre><code>
+Example Request:
+POST /users
+{
+    "username": "johndoe",
+    "password": "password123",
+    "email": "johndoe@example.com",
+    "birthday": "1990-01-01"
+}
+
+Example Response:
+{
+    "_id": "60c72b1f4f1a4a3b9c8b4567",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "birthday": "1990-01-01",
+    "favoriteMovies": []
+}
+    </code></pre>
+
+    <h3>6. Update User Info</h3>
+    <p><strong>Endpoint:</strong> <code>/users/:username</code></p>
+    <p><strong>Method:</strong> PUT</p>
+    <p><strong>Description:</strong> Allows users to update their user info.</p>
+    <pre><code>
+Example Request:
+PUT /users/johndoe
+{
+    "username": "john_doe_updated",
+    "password": "newpassword123",
+    "email": "john_doe_updated@example.com",
+    "birthday": "1991-01-01"
+}
+
+Example Response:
+{
+    "_id": "60c72b1f4f1a4a3b9c8b4567",
+    "username": "john_doe_updated",
+    "email": "john_doe_updated@example.com",
+    "birthday": "1991-01-01",
+    "favoriteMovies": []
+}
+    </code></pre>
+
+    <h3>7. Add a Movie to a User's Favorites</h3>
+    <p><strong>Endpoint:</strong> <code>/users/:username/movies/:movieID</code></p>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Description:</strong> Allows users to add a movie to their list of favorites.</p>
+    <pre><code>
+Example Request:
+POST /users/johndoe/movies/60c72b1f4f1a4a3b9c8b4567
+
+Example Response:
+{
+    "_id": "60c72b1f4f1a4a3b9c8b4567",
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "birthday": "1990-01-01",
+    "favoriteMovies": ["60c72b1f4f1a4a3b9c8b4567"]
+}
+    </code></pre>
+
+    <h3>8. Remove a Movie from a User's Favorites</h3>
+    <p><strong>Endpoint:</strong> <code>/users/:username/movies/:movieID</code></p>
+    <p><strong>Method:</strong> DELETE</p>
+    <p><strong>Description:</strong> Allows users to remove a movie from their list of favorites.</p>
+    <pre><code>
+Example Request:
+DELETE /users/johndoe/movies/60c72b1f4f1a4a3b9c8b4567
