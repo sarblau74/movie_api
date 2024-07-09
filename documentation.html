@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation</title>
+    <title>Movie API Documentation</title>
 </head>
 <body>
     <h1>Movie API Documentation</h1>
@@ -41,10 +41,10 @@ Example Response:
 [
     {
         "_id": "60c72b1f4f1a4a3b9c8b4567",
-        "title": "The Godfather",
-        "genre": { "name": "Crime", "description": "Crime movies" },
-        "director": { "name": "Francis Ford Coppola", "bio": "An American director", "birth": "1939" },
-        "rating": 9.2
+        "Title": "The Godfather",
+        "Genre": { "Name": "Crime", "Description": "Crime movies" },
+        "Director": { "Name": "Francis Ford Coppola", "Bio": "An American director", "Birth": "1939" },
+        "Rating": 9.2
     },
     ...
 ]
@@ -61,10 +61,10 @@ GET /movies/The%20Godfather
 Example Response:
 {
     "_id": "60c72b1f4f1a4a3b9c8b4567",
-    "title": "The Godfather",
-    "genre": { "name": "Crime", "description": "Crime movies" },
-    "director": { "name": "Francis Ford Coppola", "bio": "An American director", "birth": "1939" },
-    "rating": 9.2
+    "Title": "The Godfather",
+    "Genre": { "Name": "Crime", "Description": "Crime movies" },
+    "Director": { "Name": "Francis Ford Coppola", "Bio": "An American director", "Birth": "1939" },
+    "Rating": 9.2
 }
     </code></pre>
 
@@ -78,8 +78,8 @@ GET /genres/Crime
 
 Example Response:
 {
-    "name": "Crime",
-    "description": "Crime movies"
+    "Name": "Crime",
+    "Description": "Crime movies"
 }
     </code></pre>
 
@@ -93,9 +93,9 @@ GET /directors/Francis%20Ford%20Coppola
 
 Example Response:
 {
-    "name": "Francis Ford Coppola",
-    "bio": "An American director",
-    "birth": "1939"
+    "Name": "Francis Ford Coppola",
+    "Bio": "An American director",
+    "Birth": "1939"
 }
     </code></pre>
 
@@ -107,19 +107,19 @@ Example Response:
 Example Request:
 POST /users
 {
-    "username": "johndoe",
-    "password": "password123",
-    "email": "johndoe@example.com",
-    "birthday": "1990-01-01"
+    "Username": "johndoe",
+    "Password": "password123",
+    "Email": "johndoe@example.com",
+    "Birthday": "1990-01-01"
 }
 
 Example Response:
 {
     "_id": "60c72b1f4f1a4a3b9c8b4567",
-    "username": "johndoe",
-    "email": "johndoe@example.com",
-    "birthday": "1990-01-01",
-    "favoriteMovies": []
+    "Username": "johndoe",
+    "Email": "johndoe@example.com",
+    "Birthday": "1990-01-01",
+    "FavoriteMovies": []
 }
     </code></pre>
 
@@ -131,19 +131,19 @@ Example Response:
 Example Request:
 PUT /users/johndoe
 {
-    "username": "john_doe_updated",
-    "password": "newpassword123",
-    "email": "john_doe_updated@example.com",
-    "birthday": "1991-01-01"
+    "Username": "john_doe_updated",
+    "Password": "newpassword123",
+    "Email": "john_doe_updated@example.com",
+    "Birthday": "1991-01-01"
 }
 
 Example Response:
 {
     "_id": "60c72b1f4f1a4a3b9c8b4567",
-    "username": "john_doe_updated",
-    "email": "john_doe_updated@example.com",
-    "birthday": "1991-01-01",
-    "favoriteMovies": []
+    "Username": "john_doe_updated",
+    "Email": "john_doe_updated@example.com",
+    "Birthday": "1991-01-01",
+    "FavoriteMovies": []
 }
     </code></pre>
 
@@ -158,10 +158,10 @@ POST /users/johndoe/movies/60c72b1f4f1a4a3b9c8b4567
 Example Response:
 {
     "_id": "60c72b1f4f1a4a3b9c8b4567",
-    "username": "johndoe",
-    "email": "johndoe@example.com",
-    "birthday": "1990-01-01",
-    "favoriteMovies": ["60c72b1f4f1a4a3b9c8b4567"]
+    "Username": "johndoe",
+    "Email": "johndoe@example.com",
+    "Birthday": "1990-01-01",
+    "FavoriteMovies": ["60c72b1f4f1a4a3b9c8b4567"]
 }
     </code></pre>
 
@@ -172,3 +172,29 @@ Example Response:
     <pre><code>
 Example Request:
 DELETE /users/johndoe/movies/60c72b1f4f1a4a3b9c8b4567
+
+Example Response:
+{
+    "_id": "60c72b1f4f1a4a3b9c8b4567",
+    "Username": "johndoe",
+    "Email": "johndoe@example.com",
+    "Birthday": "1990-01-01",
+    "FavoriteMovies": []
+}
+    </code></pre>
+
+    <h3>9. Deregister a User</h3>
+    <p><strong>Endpoint:</strong> <code>/users/:username</code></p>
+    <p><strong>Method:</strong> DELETE</p>
+    <p><strong>Description:</strong> Allows existing users to deregister.</p>
+    <pre><code>
+Example Request:
+DELETE /users/johndoe
+
+Example Response:
+{
+    "message": "User johndoe was deleted."
+}
+    </code></pre>
+</body>
+</html>
