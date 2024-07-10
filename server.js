@@ -3,6 +3,7 @@ const Models = require('./models.js');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+let auth = require('./auth')(app);
 
 const Movies = Models.Movie;
 const Users = Models.User;
@@ -122,6 +123,45 @@ app.delete('/users/:username', (req, res) => {
         })
         .catch(err => res.status(500).send('Error: ' + err));
 });
+const passport = require('passport');
+require('./passport');
+
+app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
+  Movies.find()
+    .then(movies => res.status(200).json(movies))
+    .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Other routes...
+
+// Exclude /users endpoint from authentication
+app.post('/users', (req, res) => {
+  let hashedPassword = Users.hashPassword(req.body.Password);
+  Users.findOne({ Username: req.body.Username })
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.Username + ' already exists');
+      } else {
+        Users
+          .create({
+            Username: req.body.Username,
+            Password: hashedPassword,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+          })
+          .then((user) => { res.status(201).json(user) })
+          .catch((error) => {
+            console.error(error);
+            res.status(500).send('Error: ' + error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
+});
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
