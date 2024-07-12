@@ -1,6 +1,24 @@
-const mongoose = require('mongoose');  // Add this line to import Mongoose
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
-let userSchema = mongoose.Schema({
+const movieSchema = mongoose.Schema({
+  Title: { type: String, required: true },
+  Description: { type: String, required: true },
+  Genre: {
+    Name: String,
+    Description: String
+  },
+  Director: {
+    Name: String,
+    Bio: String,
+    Birth: Date
+  },
+  Actors: [String],
+  ImagePath: String,
+  Featured: Boolean
+});
+
+const userSchema = mongoose.Schema({
   Username: { type: String, required: true },
   Password: { type: String, required: true },
   Email: { type: String, required: true },
@@ -8,42 +26,28 @@ let userSchema = mongoose.Schema({
   FavoriteMovies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Movie' }]
 });
 
-let movieSchema = mongoose.Schema({
-  Title: { type: String, required: true },
-  Description: { type: String, required: true },
-  Genre: {
-    Name: { type: String, required: true },
-    Description: { type: String, required: true }
-  },
-  Director: {
-    Name: { type: String, required: true },
-    Bio: String,
-    Birth: Date,
-    Death: Date
-  },
-  Actors: [String],
-  ImagePath: String,
-  Featured: Boolean
+// Hashing password before saving user
+userSchema.pre('save', function(next) {
+  const user = this;
+  if (!user.isModified('Password')) return next();
+
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) return next(err);
+
+    bcrypt.hash(user.Password, salt, (err, hash) => {
+      if (err) return next(err);
+      user.Password = hash;
+      next();
+    });
+  });
 });
 
-let genreSchema = mongoose.Schema({
-  Name: { type: String, required: true },
-  Description: { type: String, required: true }
-});
+userSchema.methods.validatePassword = function(password) {
+  return bcrypt.compareSync(password, this.Password);
+};
 
-let directorSchema = mongoose.Schema({
-  Name: { type: String, required: true },
-  Bio: String,
-  Birth: Date,
-  Death: Date
-});
+const Movie = mongoose.model('Movie', movieSchema);
+const User = mongoose.model('User', userSchema);
 
-let User = mongoose.model('User', userSchema);
-let Movie = mongoose.model('Movie', movieSchema);
-let Genre = mongoose.model('Genre', genreSchema);
-let Director = mongoose.model('Director', directorSchema);
-
-module.exports.User = User;
 module.exports.Movie = Movie;
-module.exports.Genre = Genre;
-module.exports.Director = Director;
+module.exports.User = User;

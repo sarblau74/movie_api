@@ -1,43 +1,33 @@
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const JWTStrategy = require('passport-jwt').Strategy;
-const ExtractJWT = require('passport-jwt').ExtractJwt;
+const passportJWT = require('passport-jwt');
 const Models = require('./models.js');
+
 const Users = Models.User;
-const bcrypt = require('bcryptjs');
+const jwtSecretKey = 'secret_key'; // Ensure this matches the secret used when signing the JWT
 
-passport.use(new LocalStrategy({
-  usernameField: 'username',
-  passwordField: 'password'
-}, (username, password, callback) => {
-  console.log(username + ' ' + password);
-  Users.findOne({ Username: username }, (error, user) => {
-    if (error) {
-      console.log(error);
-      return callback(error);
-    }
-    if (!user) {
-      console.log('incorrect username');
-      return callback(null, false, { message: 'Incorrect username.' });
-    }
-    if (!bcrypt.compareSync(password, user.Password)) {
-      console.log('incorrect password');
-      return callback(null, false, { message: 'Incorrect password.' });
-    }
-    console.log('finished');
-    return callback(null, user);
-  });
-}));
+const JwtStrategy = passportJWT.Strategy;
+const ExtractJwt = passportJWT.ExtractJwt;
 
-passport.use(new JWTStrategy({
-  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: 'your_jwt_secret'
+// Configure JWT strategy for Passport
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: jwtSecretKey
 }, (jwtPayload, callback) => {
-  return Users.findById(jwtPayload._id)
+  // Find the user by ID from the JWT payload
+  Users.findById(jwtPayload._id)
     .then(user => {
-      return callback(null, user);
+      if (user) {
+        // User found, pass user to callback
+        return callback(null, user);
+      } else {
+        // No user found, pass false to callback
+        return callback(null, false);
+      }
     })
-    .catch(error => {
-      return callback(error);
+    .catch(err => {
+      // Error occurred, pass error to callback
+      return callback(err, false);
     });
 }));
+
+module.exports = passport;

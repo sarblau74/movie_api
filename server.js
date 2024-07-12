@@ -1,176 +1,164 @@
-const mongoose = require('mongoose');
-const Models = require('./models.js');
 const express = require('express');
-const morgan = require('morgan');
 const bodyParser = require('body-parser');
-let auth = require('./auth')(app);
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const Models = require('./models.js');
 
+const app = express();
+const port = process.env.PORT || 8080;
+
+// Middleware
+app.use(morgan('common'));
+app.use(bodyParser.json());
+app.use(express.static('public'));
+app.use(passport.initialize());
+
+// Database connection
+mongoose.connect('mongodb://localhost:27017/cfDB', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000 // 30 seconds
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('Error connecting to MongoDB:', err.message);
+});
+
+mongoose.connection.on('error', (err) => {
+  console.log('Mongoose connection error:', err);
+});
+
+// Models
 const Movies = Models.Movie;
 const Users = Models.User;
 const Genres = Models.Genre;
 const Directors = Models.Director;
 
-const app = express();
-app.use(morgan('common'));
-app.use(bodyParser.json());
-app.use(express.static('public'));
-
-mongoose.connect('mongodb://localhost:27017/cfDB', { useNewUrlParser: true, useUnifiedTopology: true });
-
-app.get('/', (req, res) => {
-    res.send('Welcome to my app!');
-});
-
-// Get all movies
-app.get('/movies', (req, res) => {
-    Movies.find()
-        .then(movies => {
-            res.status(200).json(movies);
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
-
-// Get a movie by title
-app.get('/movies/:title', (req, res) => {
-    console.log('Requested movie title:', req.params.title);
-    Movies.findOne({ Title: req.params.title })
-        .then(movie => {
-            if (movie) {
-                console.log('Movie found:', movie);
-                res.status(200).json(movie);
-            } else {
-                console.log('Movie not found');
-                res.status(404).send('Movie not found');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
-
-// Get a genre by name
-app.get('/genres/:name', (req, res) => {
-    console.log('Requested genre name:', req.params.name);
-    Genres.findOne({ Name: req.params.name })
-        .then(genre => {
-            if (genre) {
-                console.log('Genre found:', genre);
-                res.status(200).json(genre);
-            } else {
-                console.log('Genre not found');
-                res.status(404).send('Genre not found');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
-
-// Get a director by name
-app.get('/directors/:name', (req, res) => {
-    console.log('Requested director name:', req.params.name);
-    Directors.findOne({ Name: req.params.name })
-        .then(director => {
-            if (director) {
-                console.log('Director found:', director);
-                res.status(200).json(director);
-            } else {
-                console.log('Director not found');
-                res.status(404).send('Director not found');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send('Error: ' + err);
-        });
-});
-
-// Allow users to update their user info
-app.put('/users/:username', (req, res) => {
-    Users.findOneAndUpdate({ Username: req.params.username }, { $set: req.body }, { new: true })
-        .then(user => res.json(user))
-        .catch(err => res.status(500).send('Error: ' + err));
-});
-
-// Allow users to add a movie to their list of favorites
-app.post('/users/:username/movies/:movieID', (req, res) => {
-    Users.findOneAndUpdate({ Username: req.params.username }, { $push: { FavoriteMovies: req.params.movieID } }, { new: true })
-        .then(user => res.json(user))
-        .catch(err => res.status(500).send('Error: ' + err));
-});
-
-// Allow users to remove a movie from their list of favorites
-app.delete('/users/:username/movies/:movieID', (req, res) => {
-    Users.findOneAndUpdate({ Username: req.params.username }, { $pull: { FavoriteMovies: req.params.movieID } }, { new: true })
-        .then(user => res.json(user))
-        .catch(err => res.status(500).send('Error: ' + err));
-});
-
-// Allow existing users to deregister
-app.delete('/users/:username', (req, res) => {
-    Users.findOneAndRemove({ Username: req.params.username })
-        .then(user => {
-            if (user) {
-                res.send('User ' + req.params.username + ' was deleted.');
-            } else {
-                res.status(404).send('User not found');
-            }
-        })
-        .catch(err => res.status(500).send('Error: ' + err));
-});
-const passport = require('passport');
+// Passport configuration
 require('./passport');
 
+// Passport LocalStrategy for username-password authentication
+passport.use(new LocalStrategy({
+  usernameField: 'Username',
+  passwordField: 'Password'
+}, (username, password, callback) => {
+  Users.findOne({ Username: username }, (error, user) => {
+    if (error) {
+      return callback(error);
+    }
+    if (!user || !user.validatePassword(password)) {
+      return callback(null, false, { message: 'Incorrect username or password' });
+    }
+    return callback(null, user);
+  });
+}));
+
+// Route to handle user login and issue JWT token
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+    req.login(user, { session: false }, (error) => {
+      if (error) {
+        return next(error);
+      }
+      const token = jwt.sign({ _id: user._id }, 'secret_key'); 
+      return res.json({ token });
+    });
+  })(req, res, next);
+});
+
+// Route to register a new user
+app.post('/users', (req, res) => {
+  const { Username, Password, Email, Birthday } = req.body;
+
+  // Hash the password before saving
+  const hashedPassword = bcrypt.hashSync(Password, 10); // 10 is the salt rounds
+
+  Users.findOne({ Username: Username })
+    .then(user => {
+      if (user) {
+        return res.status(400).send('Username already exists');
+      } else {
+        Users.create({
+          Username: Username,
+          Password: hashedPassword,
+          Email: Email,
+          Birthday: Birthday
+        })
+          .then((user) => res.status(201).json(user))
+          .catch((error) => res.status(500).send('Error: ' + error));
+      }
+    })
+    .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Route to get all movies
 app.get('/movies', passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find()
     .then(movies => res.status(200).json(movies))
     .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Other routes...
-
-// Exclude /users endpoint from authentication
-app.post('/users', (req, res) => {
-  let hashedPassword = Users.hashPassword(req.body.Password);
-  Users.findOne({ Username: req.body.Username })
-    .then((user) => {
-      if (user) {
-        return res.status(400).send(req.body.Username + ' already exists');
+// Route to get a movie by title
+app.get('/movies/:title', (req, res) => {
+  Movies.findOne({ Title: req.params.title })
+    .then(movie => {
+      if (movie) {
+        res.status(200).json(movie);
       } else {
-        Users
-          .create({
-            Username: req.body.Username,
-            Password: hashedPassword,
-            Email: req.body.Email,
-            Birthday: req.body.Birthday
-          })
-          .then((user) => { res.status(201).json(user) })
-          .catch((error) => {
-            console.error(error);
-            res.status(500).send('Error: ' + error);
-          });
+        res.status(404).send('Movie not found');
       }
     })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Error: ' + error);
-    });
+    .catch(err => res.status(500).send('Error: ' + err));
 });
 
-// Error handler
+// Route to get a genre by name
+app.get('/genres/:name', (req, res) => {
+  Genres.findOne({ Name: req.params.name })
+    .then(genre => {
+      if (genre) {
+        res.status(200).json(genre);
+      } else {
+        res.status(404).send('Genre not found');
+      }
+    })
+    .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Route to get a director by name
+app.get('/directors/:name', (req, res) => {
+  Directors.findOne({ Name: req.params.name })
+    .then(director => {
+      if (director) {
+        res.status(200).json(director);
+      } else {
+        res.status(404).send('Director not found');
+      }
+    })
+    .catch(err => res.status(500).send('Error: ' + err));
+});
+
+// Error handler middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
-// Listen for requests
+// Catch-all for undefined routes
+app.use((req, res) => {
+  res.status(404).send('Resource not found');
+});
 
-const port = process.env.PORT || 8080;
+// Start the server
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
