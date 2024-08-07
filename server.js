@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Models = require('./models.js');
+const express = require('express');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const passport = require('passport');
+const { check, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const Joi = require('joi');
 
 const Movies = Models.Movie;
 const Users = Models.User;
@@ -12,19 +21,12 @@ if (!mongoURI) {
   process.exit(1); // Exit the application if the URI is not set
 }
 
-const express = require('express');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const passport = require('passport');
-const { check, validationResult } = require('express-validator');
-const jwt = require('jsonwebtoken');
-
 const app = express();
+
+app.use(cors());  // Enable CORS for all domains
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
 app.use(morgan('common'));
 
 // Express static function
@@ -53,29 +55,32 @@ mongoose.connection.on('error', (err) => {
 // Auth routes
 require('./auth')(app);
 
-// Route to register a new user
-app.post('/users', [
-  check('Username', 'Username is required').isLength({ min: 5 }),
-  check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
-  check('Password', 'Password is required').not().isEmpty(),
-  check('Email', 'Email does not appear to be valid').isEmail()
-], async (req, res) => {
-  let errors = validationResult(req);
+// Define the Joi schema for user validation
+const userSchema = Joi.object({
+  username: Joi.string().min(3).required(),
+  password: Joi.string().min(6).required(),
+  email: Joi.string().email().required(),
+  birthday: Joi.date().optional()
+});
 
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+// Route to register a new user
+app.post('/register', async (req, res) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).send(error.details[0].message);
   }
-  let hashedPassword = Users.hashPassword(req.body.Password);
-  await Users.findOne({ Username: req.body.Username })
+
+  let hashedPassword = await bcrypt.hash(req.body.password, 10);
+  await Users.findOne({ Username: req.body.username })
     .then((user) => {
       if (user) {
-        return res.status(400).send(req.body.Username + ' already exists.');
+        return res.status(400).send(req.body.username + ' already exists.');
       } else {
         Users.create({
-          Username: req.body.Username,
+          Username: req.body.username,
           Password: hashedPassword,
-          Email: req.body.Email,
-          Birthday: req.body.Birthday
+          Email: req.body.email,
+          Birthday: req.body.birthday
         })
           .then((user) => res.status(201).json(user))
           .catch((error) => res.status(500).send('Error: ' + error));
@@ -86,15 +91,21 @@ app.post('/users', [
 
 // Login route
 app.post('/login', async (req, res) => {
-  const { Username, Password } = req.body;
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).send(error.details[0].message);
+  }
 
-  await Users.findOne({ Username: Username })
-    .then((user) => {
+  const { username, password } = req.body;
+
+  await Users.findOne({ Username: username })
+    .then(async (user) => {
       if (!user) {
         return res.status(400).send('User not found');
       }
 
-      if (!user.validatePassword(Password)) {
+      const isMatch = await bcrypt.compare(password, user.Password);
+      if (!isMatch) {
         return res.status(400).send('Incorrect password');
       }
 
@@ -125,7 +136,7 @@ app.put('/users/:Username', passport.authenticate('jwt', { session: false }), [
     return res.status(400).send('Permission denied');
   }
 
-  let hashedPassword = Users.hashPassword(req.body.Password);
+  let hashedPassword = await bcrypt.hash(req.body.Password, 10);
   await Users.findOneAndUpdate(
     { Username: req.params.Username },
     {
