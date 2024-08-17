@@ -14,10 +14,10 @@ const Models = require('./models.js');
 const Movies = Models.Movie;
 const Users = Models.User;
 
-const mongoURI = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
+const connection_URI = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
 
 // Connect to MongoDB
-mongoose.connect(mongoURI, {
+mongoose.connect(connection_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
