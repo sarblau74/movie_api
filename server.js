@@ -14,17 +14,22 @@ const Models = require('./models.js');
 const Movies = Models.Movie;
 const Users = Models.User;
 
-const connection_URI = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
+const uri = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
+const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
+async function run() {
+  try {
+    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
+    await mongoose.connect(uri, clientOptions);
+    await mongoose.connection.db.admin().command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await mongoose.disconnect();
+  }
+}
+run().catch(console.dir);
 
-// Connect to MongoDB
-mongoose.connect(connection_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('Connected to MongoDB');
-}).catch((err) => {
-  console.error('Error connecting to MongoDB:', err.message);
-});
+mongoose.set('debug', true);
 
 // Invoke CORS - cross-origin resource sharing
 const cors = require('cors');
