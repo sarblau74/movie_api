@@ -1,18 +1,23 @@
-// Require express
-const express = require('express'),
-  morgan = require('morgan'),
-  bodyParser = require('body-parser'),
-  uuid = require('uuid');
+// Require necessary packages
+const express = require('express');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const uuid = require('uuid');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const passport = require('passport');
+const { check, validationResult } = require('express-validator');
 
 // Initialize express
 const app = express();
 
-// Require Mongoose package and models.js
-const mongoose = require('mongoose');
+// Require Mongoose models from models.js
 const Models = require('./models.js');
-
 const Movies = Models.Movie;
 const Users = Models.User;
+
+// Set the MongoDB URI; for local testing, it defaults to a local database
+//const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cfDB';
 
 const uri = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
@@ -28,12 +33,27 @@ async function run() {
   }
 }
 run().catch(console.dir);
+// Enable Mongoose debug mode to see database queries
+mongoose.set('debug', true);
+
+//const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
+//async function run() {
+  //try {
+    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
+    //await mongoose.connect(uri, clientOptions);
+    //await mongoose.connection.db.admin().command({ ping: 1 });
+    //console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  //} finally {
+    // Ensures that the client will close when you finish/error
+    //await mongoose.disconnect();
+  //}
+//}
+
+//run().catch(console.dir);
 
 mongoose.set('debug', true);
 
 // Invoke CORS - cross-origin resource sharing
-const cors = require('cors');
-app.use(cors());
 
 // express.static to serve documentation.html file from public folder
 app.use(
@@ -48,62 +68,53 @@ app.use(express.urlencoded({ extended: true }));
 // Import auth.js file (and express available in auth.js)
 let auth = require('./auth')(app);
 
-// require passport module and import passport.js file
-const passport = require('passport');
-require('./passport');
-
-// Require express-validator
-const { check, validationResult } = require('express-validator');
-
 // Invoke middleware function (Morgan)
 app.use(morgan('common'));
 
+//test route
+app.get('/test', (req, res) => {
+  res.send('Test route is working!');
+});
+
 // CREATE new user registration
-app.post(
-  '/users',
-  [
-    check('Username', 'Username is required').isLength({ min: 5 }),
-    check(
-      'Username',
-      'Username contains non alphanumeric characters - not allowed.'
-    ).isAlphanumeric(),
-    check('Password', 'Password is required').not().isEmpty(),
-    check('Email', 'Email does not appear to be valid').isEmail()
-  ],
-  async (req, res) => {
-    let errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-
-    let hashedPassword = Users.hashPassword(req.body.Password);
-    await Users.findOne({ Username: req.body.Username })
-      .then((user) => {
-        if (user) {
-          return res.status(400).send(req.body.Username + ' already exists');
-        } else {
-          Users.create({
-            Username: req.body.Username,
-            Password: hashedPassword,
-            Email: req.body.Email,
-            Birthday: req.body.Birthday
-          })
-            .then((user) => {
-              res.status(201).json(user);
-            })
-            .catch((error) => {
-              console.error(error);
-              res.status(500).send('Error: ' + error);
-            });
+  app.post(
+    '/users',
+    [
+      check('Username', 'Username is required').isLength({ min: 5 }),
+      check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+      check('Password', 'Password is required').not().isEmpty(),
+      check('Email', 'Email does not appear to be valid').isEmail(),
+    ],
+    async (req, res) => {
+      const errors = validationResult(req);
+  
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+  
+      try {
+        const hashedPassword = Users.hashPassword(req.body.Password);
+        const existingUser = await Users.findOne({ Username: req.body.Username });
+  
+        if (existingUser) {
+          return res.status(400).send(`${req.body.Username} already exists`);
         }
-      })
-      .catch((error) => {
-        console.error(error);
-        res.status(500).send('Error: ' + error);
-      });
-  }
-);
+  
+        const newUser = await Users.create({
+          Username: req.body.Username,
+          Password: hashedPassword,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday,
+        });
+  
+        return res.status(201).json(newUser);
+      } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).send('Error creating user: ' + error.message);
+      }
+    }
+  );
+  
 
 // UPDATE user info by username
 app.put(
@@ -319,9 +330,12 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
-
 //Listen for requests
-const port = process.env.PORT || 8080;
+//const port = process.env.PORT || 8080;
+//app.listen(port, '0.0.0.0', () => {
+//console.log('Listening on Port ' + port);
+//});
+const port = process.env.PORT || 23691;
 app.listen(port, '0.0.0.0', () => {
 console.log('Listening on Port ' + port);
 });
