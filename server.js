@@ -16,46 +16,44 @@ const Models = require('./models.js');
 const Movies = Models.Movie;
 const Users = Models.User;
 
-// Set the MongoDB URI; for local testing, it defaults to a local database
-//const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cfDB';
+// Set the MongoDB URI; update with your actual environment variable or local URI as needed
+const uri = process.env.MONGODB_URI || "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
 
-const uri = "mongodb+srv://sarahblauvelt74:Madcat111!@myapi.mplmq.mongodb.net/?retryWrites=true&w=majority&appName=myApi";
-const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-async function run() {
+// MongoDB connection options
+const clientOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: { version: '1', strict: true, deprecationErrors: true },
+};
+
+// Function to connect to MongoDB
+async function connectDB() {
   try {
-    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
     await mongoose.connect(uri, clientOptions);
-    await mongoose.connection.db.admin().command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await mongoose.disconnect();
+    console.log("Successfully connected to MongoDB!");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1); // Exit process if connection fails
   }
 }
-run().catch(console.dir);
+
+// Handle MongoDB connection errors and disconnections
+mongoose.connection.on('error', (err) => {
+  console.error(`MongoDB connection error: ${err}`);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Retrying connection...');
+  connectDB(); // Retry connection if disconnected
+});
+
 // Enable Mongoose debug mode to see database queries
 mongoose.set('debug', true);
 
-//const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
-//async function run() {
-  //try {
-    // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
-    //await mongoose.connect(uri, clientOptions);
-    //await mongoose.connection.db.admin().command({ ping: 1 });
-    //console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  //} finally {
-    // Ensures that the client will close when you finish/error
-    //await mongoose.disconnect();
-  //}
-//}
-
-//run().catch(console.dir);
-
-mongoose.set('debug', true);
-
 // Invoke CORS - cross-origin resource sharing
+app.use(cors());
 
-// express.static to serve documentation.html file from public folder
+// Serve documentation.html file from the public folder
 app.use(
   '/documentation',
   express.static('public', { index: 'documentation.html' })
@@ -71,50 +69,49 @@ let auth = require('./auth')(app);
 // Invoke middleware function (Morgan)
 app.use(morgan('common'));
 
-//test route
+// Test route
 app.get('/test', (req, res) => {
   res.send('Test route is working!');
 });
 
 // CREATE new user registration
-  app.post(
-    '/users',
-    [
-      check('Username', 'Username is required').isLength({ min: 5 }),
-      check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
-      check('Password', 'Password is required').not().isEmpty(),
-      check('Email', 'Email does not appear to be valid').isEmail(),
-    ],
-    async (req, res) => {
-      const errors = validationResult(req);
-  
-      if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-      }
-  
-      try {
-        const hashedPassword = Users.hashPassword(req.body.Password);
-        const existingUser = await Users.findOne({ Username: req.body.Username });
-  
-        if (existingUser) {
-          return res.status(400).send(`${req.body.Username} already exists`);
-        }
-  
-        const newUser = await Users.create({
-          Username: req.body.Username,
-          Password: hashedPassword,
-          Email: req.body.Email,
-          Birthday: req.body.Birthday,
-        });
-  
-        return res.status(201).json(newUser);
-      } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).send('Error creating user: ' + error.message);
-      }
+app.post(
+  '/users',
+  [
+    check('Username', 'Username is required').isLength({ min: 5 }),
+    check('Username', 'Username contains non-alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
     }
-  );
-  
+
+    try {
+      const hashedPassword = Users.hashPassword(req.body.Password);
+      const existingUser = await Users.findOne({ Username: req.body.Username });
+
+      if (existingUser) {
+        return res.status(400).send(`${req.body.Username} already exists`);
+      }
+
+      const newUser = await Users.create({
+        Username: req.body.Username,
+        Password: hashedPassword,
+        Email: req.body.Email,
+        Birthday: req.body.Birthday,
+      });
+
+      return res.status(201).json(newUser);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).send('Error creating user: ' + error.message);
+    }
+  }
+);
 
 // UPDATE user info by username
 app.put(
@@ -330,12 +327,11 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
-//Listen for requests
-//const port = process.env.PORT || 8080;
-//app.listen(port, '0.0.0.0', () => {
-//console.log('Listening on Port ' + port);
-//});
-const port = process.env.PORT || 23691;
-app.listen(port, '0.0.0.0', () => {
-console.log('Listening on Port ' + port);
+
+// Start the server only after successful MongoDB connection
+connectDB().then(() => {
+  const port = process.env.PORT || 23691;
+  app.listen(port, '0.0.0.0', () => {
+    console.log('Listening on Port ' + port);
+  });
 });
